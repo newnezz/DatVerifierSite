@@ -48,12 +48,50 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(terminal);
     }
 
-    // Add click effect to download button
+    // Handle download button click
     const downloadBtn = document.querySelector('.download-btn');
     if (downloadBtn) {
         downloadBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            alert('Download functionality coming soon!');
+            
+            // Get the current location and construct the correct path
+            const currentPath = window.location.pathname;
+            const isLocalFile = currentPath.startsWith('file://') || currentPath === '/';
+            const downloadPath = isLocalFile ? './downloads/datverifier.zip' : '/downloads/datverifier.zip';
+            
+            // Update the href and trigger download
+            downloadBtn.href = downloadPath;
+            
+            // Show feedback message
+            const versionText = document.querySelector('.version-text');
+            const originalText = versionText.textContent;
+            
+            // Verify if file exists (for local file system)
+            if (isLocalFile) {
+                fetch(downloadPath)
+                    .then(response => {
+                        if (response.ok) {
+                            versionText.textContent = 'Download started! Check your downloads folder.';
+                            versionText.style.color = '#008800';
+                        } else {
+                            versionText.textContent = 'Download failed. Please check if the file exists in the downloads folder.';
+                            versionText.style.color = '#aa0000';
+                        }
+                    })
+                    .catch(() => {
+                        versionText.textContent = 'Download failed. Please check if the file exists in the downloads folder.';
+                        versionText.style.color = '#aa0000';
+                    });
+            } else {
+                versionText.textContent = 'Download started! Check your downloads folder.';
+                versionText.style.color = '#008800';
+            }
+            
+            // Reset message after 3 seconds
+            setTimeout(() => {
+                versionText.textContent = originalText;
+                versionText.style.color = '';
+            }, 3000);
         });
     }
 }); 
